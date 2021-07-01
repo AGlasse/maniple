@@ -112,7 +112,7 @@ class FitsDialogue(Toplevel):
             try:
                 os.chdir(load_path)
             except Exception:
-                os.chdir('.')
+                os.chdir('..')
             self.filebox.bind("<Button-1>", self.inspect)
         if func == 'save':       # Include file name entry
             os.chdir(save_path)
@@ -144,7 +144,7 @@ class FitsDialogue(Toplevel):
             save_path = paths[1]
             return load_path, save_path
         except IOError:
-            self._save_persistent_paths(load_path='.', save_path='.')
+            self._save_persistent_paths(load_path='..', save_path='..')
         return
 
     def _save_persistent_paths(self, **kwargs):
