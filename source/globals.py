@@ -20,12 +20,12 @@ class Globals:
 
     @staticmethod
     def set_display_buffer(buffer_name):
-        print('Setting display to buffer ' + Globals.display_buffer_name)
+#        print('Setting display to buffer ' + Globals.display_buffer_name)
         Globals.display_buffer_name = buffer_name
         return
 
     @staticmethod
     def get_display_buffer():
-        print('Displaying buffer ' + Globals.display_buffer_name)
+#        print('Displaying buffer ' + Globals.display_buffer_name)
         buffer = Globals.buffers[Globals.display_buffer_name]
         return buffer

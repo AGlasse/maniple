@@ -133,5 +133,5 @@ class PhotCommand(Command):
                 dy = y - yc
                 r2 = dx*dx + dy*dy
                 r = math.sqrt(r2)
-                mask[y, x] = True if r > r_aper else False
+                mask[y, x] = True if r <= r_aper else False
         return mask
