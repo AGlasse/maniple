@@ -13,7 +13,8 @@ class MathsPanel(Panel):
     tts = ['A + B', 'A - B', 'A x B', 'A / B',
            'A + c', 'A - c', 'A x c', 'A / c',
            'Normalise frame', 'Log10']
-    norm_idx = len(tts) - 1
+    norm_idx = len(tts) - 2
+    log_idx = len(tts) - 1
 
     def __init__(self, maniple):
         Panel.__init__(self, maniple)
@@ -43,6 +44,8 @@ class MathsPanel(Panel):
         idx = op_idx
         if op_idx is self.norm_idx:
             self._norm()
+        if op_idx is self.log_idx:
+            self._log()
         else:
             if op_idx > max_bin_idx:        # Trap unary operations
                 idx = op_idx - 4
@@ -61,10 +64,10 @@ class MathsPanel(Panel):
                     z[idx_zero] = np.NaN
                 else:
                     z = np.divide(a, b)
-        try:
-            Globals.buffers['A'].block = z
-        except ValueError:
-            print('mathsPanel._oper - Undefined function called !!')
+            try:
+                Globals.buffers['A'].block = z
+            except ValueError:
+                print('mathsPanel._oper - Undefined function called !!')
         base = self.get_base()
         base.refresh()
         return
@@ -74,12 +77,22 @@ class MathsPanel(Panel):
         from 0 to 1.
         :return:
         """
-        block = Globals.buffers['A'].get_val()
+        block = Globals.buffers['A'].block
         vmin, vmax = self.maniple.get_vlimits()
         vrange = vmax - vmin
         b = np.subtract(block, vmin)
         b = np.divide(b, vrange)
-        Globals.buffers['A'].set(b)
+        Globals.buffers['A'].block = b
+        # Globals.buffers['A'].set(b)
+        base = self.get_base()
+        base.refresh()
+        return
+
+    def _log(self):
+
+        block = Globals.buffers['A'].block
+        b = np.log10(block)
+        Globals.buffers['A'].block = b
         base = self.get_base()
         base.refresh()
         return

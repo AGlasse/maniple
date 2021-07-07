@@ -10,6 +10,7 @@ from tooltip import Tooltip
 from icon import Icon
 from panel import Panel
 from globals import Globals
+import sys
 
 class IoPanel(Panel):
 
