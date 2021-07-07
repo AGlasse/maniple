@@ -42,10 +42,14 @@ class MathsPanel(Panel):
         c = int(float(self.con_entry.get()))
         max_bin_idx = 3
         idx = op_idx
-        if op_idx is self.norm_idx:
-            self._norm()
-        if op_idx is self.log_idx:
-            self._log()
+        is_norm = op_idx is self.norm_idx
+        is_log = op_idx is self.log_idx
+
+        if is_norm or is_log:
+            if is_norm:
+                self._norm()
+            if is_log:
+                self._log()
         else:
             if op_idx > max_bin_idx:        # Trap unary operations
                 idx = op_idx - 4
