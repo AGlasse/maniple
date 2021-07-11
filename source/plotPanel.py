@@ -30,11 +30,17 @@ class PlotPanel(Panel):
         self.con_entry = self.make_entry(val=0.0, fmt='{:5.1f}',
                                          tt='Enter constant')
         self.con_entry.grid(row=1, column=1, sticky=W)
+        self.row_entry = self.make_entry(val=0.0, fmt='{:5.1f}',
+                                         tt='Enter row number')
+        self.row_entry.grid(row=2, column=1, sticky=W)
+        self.col_entry = self.make_entry(val=0.0, fmt='{:5.1f}',
+                                         tt='Enter column number')
+        self.col_entry.grid(row=3, column=1, sticky=W)
 
     def select_mode(self, mode):
         for b, m in zip(self.mode_buttons, self.modes):
             if m[1] is mode:
-                b.state(['pressed'])
+                b.state(['pressed']) #not sure how this works
                 self.mode_setting = mode
             else:
                 b.state(['!pressed'])
@@ -58,10 +64,18 @@ class PlotPanel(Panel):
             axes.hist(image.flatten(), bins)
         if self.mode_setting is 'r':
             nx = image.shape[1]
-            row = 10
+            row = int(float(self.row_entry.get()))
             xb = np.arange(0, nx)
-            yb = image[:, row]
+            yb = image[row,:]
             axes.set_xlim(0, nx)
             axes.set_ylim(vmin, vmax)
             axes.plot(xb, yb, color='green')
+        if self.mode_setting is 'c':
+            nx = image.shape[0]
+            column = int(float(self.col_entry.get()))
+            xb = np.arange(0, nx)
+            yb = image[:,column]
+            axes.set_xlim(0, nx)
+            axes.set_ylim(vmin, vmax)
+            axes.plot(xb, yb, color='red')
         self.canvas.draw()
