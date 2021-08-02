@@ -19,7 +19,7 @@ class Icon:
         width = kwargs.get('width', -1)
         height = kwargs.get('height', -1)
         exd = Globals.execution_directory
-        icon_folder = exd + '\\..\\Icons'
+        icon_folder = exd + '\\Icons'
         iconfile = icon_folder + '\\' + name + '.png'
         img = Image.open(iconfile)
         if width > 0:
