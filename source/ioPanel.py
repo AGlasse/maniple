@@ -12,12 +12,12 @@ from panel import Panel
 from globals import Globals
 import sys
 
+
 class IoPanel(Panel):
 
     file_labels = []
     name_vars = []
     path_separator = None
-    display_buffer = "A"
 
     def __init__(self, parent):
         Panel.__init__(self, parent)
@@ -34,17 +34,20 @@ class IoPanel(Panel):
         self.pad = self.BUTTON_PAD
         self._make_load_widget(0, font, row=1)
         self._make_load_widget(1, font, row=2)
+        self._make_save_widget()
+        return
+
+    def _display_buffer(self, buff_name):
+        Globals.set_display_buffer(buff_name)
+        print('Display buffer ' + buff_name)
+        return
+
+    def _make_save_widget(self):
         tt = 'Save buffer A to fits file'
         lcom = lambda: self._launch_fits_dialogue('save')
         self.make_button(icon_name='io_saveFits', lcom=lcom, tt=tt, row=1, column=3)
         return
 
-    def _display_buffer(self, buff_name):
-        Globals.set_display_buffer(buff_name)
-
-        self.display_buffer = buff_name
-        print('Display buffer ' + buff_name)
-        return
 
     def _make_load_widget(self, buffer_index, font, **kwargs):
         idxs = ['A', 'B']
@@ -53,8 +56,7 @@ class IoPanel(Panel):
         icon_name = 'io_load' + idx
         icon = Icon(icon_name, height=self.ICON_HEIGHT)
         button = ttk.Button(self, image=icon.image,
-                            command=lambda:
-                            self._launch_fits_dialogue('load', buffer_id=idx))
+                            command=lambda: self._launch_fits_dialogue('load', buffer_id=idx))
         button.image = icon.image       # Keep image reference
         Tooltip(button, text='Load fits cube into buffer ' + idx,
                 wraplength=200)
@@ -72,7 +74,7 @@ class IoPanel(Panel):
 
     def _launch_fits_dialogue(self, func, **kwargs):
         buffer_id = kwargs.get('buffer_id', 0)
-        fits_dialogue = FitsDialogue(self, func, buffer_id)
+        _ = FitsDialogue(self, func, buffer_id)
         return
 
 class FitsDialogue(Toplevel):
@@ -82,6 +84,7 @@ class FitsDialogue(Toplevel):
     """
     def __init__(self, parent, func, buffer_id):
         self.parent = parent
+        self.selected_path = None
         Toplevel.__init__(self, parent)
         font = parent.LARGE_FONT
         func_select = 'Load ' if func == 'load' else 'Save '
@@ -102,11 +105,9 @@ class FitsDialogue(Toplevel):
         filebox_label.grid(row=2, column=0, columnspan=3)
         self.filebox = tk.Listbox(self, font=font, width=50)    # Display files
         self.filebox.grid(row=3, column=0, columnspan=3)
-        text = 'Click on file to show data units'
+        text = 'Click on file to show HDUs'
         Tooltip(self.filebox, text=text, wraplength=200)
         load_path, save_path = self._load_persistent_paths()
-#        self.hdu_panel = HDUPanel(self)
-#        self.hdu_panel.grid(row=1, column=4)
 
         # If loading, prevent file overwriting and display HDU parameters
         if func == 'load':
@@ -184,17 +185,22 @@ class FitsDialogue(Toplevel):
         return
 
     def inspect(self, event):
-        file = self.filebox.get(tk.ACTIVE)
+        fb = event.widget
+        text_list = fb.get(0, fb.size())
+        text_idx = fb.nearest(event.y)
+        file = text_list[text_idx]
         cwd = os.getcwd()
         ps = IoPanel.path_separator
         path = cwd + ps + file
+        self.selected_path = path
+        print('Opening ' + path)
         hdu_list = fits.open(path, mode='readonly')
         hdu_panel = HDUPanel(self, hdu_list)
         hdu_panel.grid(row=1, column=4)
         self.refresh()
         return
 
-    def changedir(self, event):
+    def changedir(self, _):
         """ Change working directory.
         """
         cwd = os.getcwd()
@@ -236,7 +242,7 @@ class FitsDialogue(Toplevel):
         cwd = os.getcwd()
         self._save_persistent_paths(save_path=cwd)
         path = cwd + '/' + file
-        hdu = self.parent.maniple.buffers['A'].get()
+        hdu = Globals.buffers['A'].get()
         fits.writeto(path, hdu, header=None, overwrite=True)
         if not self.validate():
             self.initial_focus.focus_set()  # put focus back
@@ -248,11 +254,12 @@ class FitsDialogue(Toplevel):
         from globals import Globals
 
         hdu_name = hdu.name
+        print(hdu_name)
         file = self.filebox.get(tk.ACTIVE)
-        print(file)
+        print('!!  load_hdu  ' + file)
         cwd = os.getcwd()
         self._save_persistent_paths(load_path=cwd)
-        path = cwd + '/' + file
+        path = self.selected_path       # cwd + '/' + file
         image_name = path.split('/')[-1] + ", " + hdu_name
         if self.buffer_id == 'A':
             self.parent.name_vars[0].set(image_name)
@@ -264,6 +271,8 @@ class FitsDialogue(Toplevel):
         for dim in range(ndim, 4):        # eg single frame y, x, -> int,frame,y,x
             datacube = np.expand_dims(datacube, axis=0)
         Globals.load_buffer(self.buffer_id, datacube)
+        dmin, dmax = np.nanmin(datacube), np.nanmax(datacube)
+        print("Datacube min, max = {:10.3f}, {:10.3f}".format(dmin, dmax))
         Globals.set_display_buffer(self.buffer_id)
         base = self.parent.get_base()
         base.reset()

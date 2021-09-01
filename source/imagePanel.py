@@ -64,13 +64,13 @@ class ImagePanel(Panel):
 
     def on_change(self):
         base = self.get_base()
-        base.build()
+        base.refresh()
         return
 
     def uncrop(self):
         self._reset_bounds()
         base = self.get_base()
-        base.build()
+        base.refresh()
         return
 
     def croptobox(self, box):
@@ -85,7 +85,9 @@ class ImagePanel(Panel):
         (ymin, ymax) = (ya, yb) if ya < yb else (yb, ya)
         self.ymin_control.set_val(ymin)
         self.ymax_control.set_val(ymax)
-        self.maniple.build()
+        base = self.get_base()
+        base.refresh()
+        return
 
     def _toxy(self, event):
         is_valid = False
@@ -161,15 +163,15 @@ class ImagePanel(Panel):
 
     def refresh(self):
         IP = ImagePanel
-        buffer_name = ImagePanel.b_scale.get_val()
+        buffer_name = IP.b_scale.get_val()
         Globals.set_display_buffer(buffer_name)
         buffer = Globals.get_display_buffer()
         cube = int(self.c_scale.get_val())
         zslice = int(self.z_scale.get_val())
         self.frame = buffer.get_frame(cube, zslice)
 
-        xmin = ImagePanel.xmin_control.get_val()
-        xmax = ImagePanel.xmax_control.get_val()
+        xmin = IP.xmin_control.get_val()
+        xmax = IP.xmax_control.get_val()
         ymin = self.ymin_control.get_val()
         ymax = self.ymax_control.get_val()
         vpmin, vpmax = IP.value_panel.getplotlimits()
