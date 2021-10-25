@@ -69,7 +69,7 @@ class MathsPanel(Panel):
                 else:
                     z = np.divide(a, b)
             try:
-                Globals.buffers['A'].block = z
+                Globals.buffers['A'].set(z)
             except ValueError:
                 print('mathsPanel._oper - Undefined function called !!')
         base = self.get_base()

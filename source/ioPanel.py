@@ -12,6 +12,7 @@ from panel import Panel
 from globals import Globals
 import sys
 
+
 class IoPanel(Panel):
 
     file_labels = []
@@ -28,8 +29,8 @@ class IoPanel(Panel):
             drives = win32api.GetLogicalDriveStrings()
             IoPanel.drives = drives.split('\000')[:-1]
             print(drives)
-        rundir = os.getcwd()
-        self.path_file = rundir + IoPanel.path_separator + 'pathfile.txt'
+        run_dir = os.getcwd()
+        self.path_file = run_dir + IoPanel.path_separator + 'pathfile.txt'
         font = self.LARGE_FONT
         self.pad = self.BUTTON_PAD
         self._make_load_widget(0, font, row=1)
@@ -167,7 +168,18 @@ class FitsDialogue(Toplevel):
             tokens = sub_folder.split(ps)
             folder = tokens[len(tokens)-1]  # + ps
             self.navbox.insert(tk.END, folder)
-        self.navbox_var.set('Folder - ' + cwd)
+        text = ''
+        nchars = len(cwd)
+        p2 = 0
+        more_text = True
+        while more_text:
+            p1 = p2
+            p2 = nchars if nchars - p1 < 40 else p1 + 40
+            text += cwd[p1: p2]
+            text += '\n'
+            more_text = p2 < nchars
+
+        self.navbox_var.set('Folder - ' + text)
         for drive in IoPanel.drives:
             self.navbox.insert(tk.END, drive)
         self.filebox.delete(0, END)
@@ -249,7 +261,6 @@ class FitsDialogue(Toplevel):
 
         hdu_name = hdu.name
         file = self.filebox.get(tk.ACTIVE)
-        print(file)
         cwd = os.getcwd()
         self._save_persistent_paths(load_path=cwd)
         path = cwd + '/' + file
@@ -263,8 +274,9 @@ class FitsDialogue(Toplevel):
         ndim = len(shape)
         for dim in range(ndim, 4):        # eg single frame y, x, -> int,frame,y,x
             datacube = np.expand_dims(datacube, axis=0)
+        print("Writing {:s} to buffer {:s}".format(file, self.buffer_id))
         Globals.load_buffer(self.buffer_id, datacube)
-        Globals.set_display_buffer(self.buffer_id)
+#        Globals.set_display_buffer(self.buffer_id)
         base = self.parent.get_base()
         base.reset()
         base.refresh()

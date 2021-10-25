@@ -5,7 +5,7 @@ from globals import Globals
 
 class Icon:
     """ Load an image which can be used as a tkinter button icon.
-    Note - it would be better to inherit Icon from PhotoImage..
+    Note - it would be better to inherit Icon from PhotoImage.
     The image can be resized using width and height parameters.
 
     name - Name of bitmap file containing base image
@@ -19,7 +19,7 @@ class Icon:
         width = kwargs.get('width', -1)
         height = kwargs.get('height', -1)
         exd = Globals.execution_directory
-        icon_folder = exd + '\\..\\Icons'
+        icon_folder = exd + '\\Icons'
         iconfile = icon_folder + '\\' + name + '.png'
         img = Image.open(iconfile)
         if width > 0:

@@ -14,8 +14,7 @@ class Globals:
 
     @staticmethod
     def load_buffer(buffer_name, block):
-        print('Writing data to buffer ' + buffer_name)
-        Globals.buffers[buffer_name].block = block
+        Globals.buffers[buffer_name].set(block)
         return
 
     @staticmethod

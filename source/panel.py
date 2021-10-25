@@ -13,10 +13,11 @@ class Panel(ttk.Frame):
         self.parent = parent
         screen_width = ttk.Frame.winfo_screenwidth(self)
         idx = int(screen_width / 1000)
+        idx = 0
         fontsize = [10, 12, 24][idx]
         self.LARGE_FONT = ('Helvetica', fontsize)
         self.ICON_HEIGHT = [15, 20, 50][idx]
-        self.IMAGE_SIZE = [8, 8, 18][idx]
+        self.IMAGE_SIZE = [6, 8, 18][idx]
         pw = [5, 5, 12][idx]
         ph = [3, 3, 8][idx]
         self.PLOT_SIZE = (pw, ph)
