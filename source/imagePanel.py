@@ -21,7 +21,7 @@ class ImagePanel(Panel):
         self.command = Command()
         fs = self.IMAGE_SIZE
         f = Figure(figsize=(fs, fs), dpi=100)
-        self.imageAxes = f.add_subplot(111)
+        self.image_axes = f.add_subplot(111)
         self.canvas = FigureCanvasTkAgg(f, self)
         self.canvas.draw()
         self.canvas.mpl_connect('button_press_event', self._on_click)
@@ -42,7 +42,7 @@ class ImagePanel(Panel):
         IP.z_scale = Slider(self, text='Z layer', orient=VERTICAL, row=3, column=4)
         IP.c_scale = Slider(self, text='Cube', orient=VERTICAL, row=3, column=5)
         IP.b_scale = Slider(self, text='Buffer', orient=VERTICAL,
-                            row=3, column=6, textvals=['A', 'B'])
+                            row=3, column=6, textvals=['A', 'B'], val='A')
 
         self.make_button(icon_name='im_uncrop', row=3, column=2,
                 tt='Restore image to full frame',
@@ -125,8 +125,8 @@ class ImagePanel(Panel):
     def _reset_bounds(self):
         """ Restore image display bounds to include all pixels. """
         buffer_id = ImagePanel.b_scale.get_val()
-        Globals.set_display_buffer(buffer_id)
-        buffer = Globals.get_display_buffer()
+        print('iP._rb - Resetting display for buffer ' + buffer_id)
+        buffer = Globals.get_buffer(buffer_id)
         cmax, zmax, ymax, xmax = buffer.get_bounds()
         IP = ImagePanel
         IP.xmin_control.set_bounds(xmax-1, 0)
@@ -138,11 +138,6 @@ class ImagePanel(Panel):
         IP.ymax_control.set_bounds(0, ymax-1)
         IP.ymax_control.set_val(ymax-1)
         return buffer, cmax, zmax
-
-    def slider_changed(self):
-
-        return
-
 
     def reset(self, _=None):
         buffer, cmax, zmax = self._reset_bounds()
@@ -162,22 +157,27 @@ class ImagePanel(Panel):
         return
 
     def refresh(self):
-        IP = ImagePanel
-        buffer_name = IP.b_scale.get_val()
-        Globals.set_display_buffer(buffer_name)
-        buffer = Globals.get_display_buffer()
+        buffer_name = self.b_scale.get_val()
+        buffer = Globals.get_buffer(buffer_name)
         cube = int(self.c_scale.get_val())
         zslice = int(self.z_scale.get_val())
         self.frame = buffer.get_frame(cube, zslice)
 
-        xmin = IP.xmin_control.get_val()
-        xmax = IP.xmax_control.get_val()
+        xmin = self.xmin_control.get_val()
+        xmax = self.xmax_control.get_val()
         ymin = self.ymin_control.get_val()
         ymax = self.ymax_control.get_val()
-        vpmin, vpmax = IP.value_panel.getplotlimits()
+
+        vpmin, vpmax = self.value_panel.getplotlimits()
 
         self.image = self.frame[ymin:ymax+1, xmin:xmax+1]
-        axes = self.imageAxes
+
+        vmin = np.nanmin(self.image)
+        vmax = np.nanmax(self.image)
+        self.value_panel.setlimits(vmin, vmax)
+
+
+        axes = self.image_axes
         axes.clear()            # Clear or else you get artifacts when resizing
         axes.set_xlim(xmin-1, xmax+1)
         axes.set_ylim(ymin-1, ymax+1)
@@ -208,7 +208,7 @@ class Slider(Panel):
         self.value = kwargs.get('val', 0)
         self.loText = StringVar()
         self.hiText = StringVar()
-        self.val_text = StringVar()
+        self.val_text = StringVar(parent, self.value)
         row = kwargs.get('row', 0)
         column = kwargs.get('column', 0)
         sticky = kwargs.get('sticky', 'nw')
@@ -224,6 +224,17 @@ class Slider(Panel):
         self.scale = ttk.Scale(self, orient=orient, command=self._on_slider_changed)
         self.scale.grid(row=2, column=0)
         self.set_bounds(minval, maxval)
+        return
+
+    def get_val(self):
+        val = int(self.scale.get())
+        if self.textvals != None:
+            val = self.textvals[val]
+        return val
+
+    def set_val(self, val):
+        self.val_text.set('{:3d}'.format(val))
+        self.scale.set(val)
         return
 
     def set_bounds(self, minval, maxval):
@@ -260,14 +271,3 @@ class Slider(Panel):
         base = self.get_base()
         base.refresh()
         return
-
-    def set_val(self, val):
-        self.val_text.set('{:3d}'.format(val))
-        self.scale.set(val)
-        return
-
-    def get_val(self):
-        val = int(self.scale.get())
-        if self.textvals != None:
-            val = self.textvals[val]
-        return val

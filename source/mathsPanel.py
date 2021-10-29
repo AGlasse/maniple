@@ -60,8 +60,8 @@ class MathsPanel(Panel):
                 z = np.subtract(a, b)
             if idx == 2:
                 z = np.multiply(a, b)
-            if idx == 3:            # Set divide by zero values to Nan
-                if op_idx == 7:     # Divide by constant
+            if idx == 3:                    # Set divide by zero values to Nan
+                if op_idx == 7:             # Divide by constant
                     idx_zero = b == 0
                     b[idx_zero] = 1.0
                     z = np.divide(a, b)
