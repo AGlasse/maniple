@@ -245,8 +245,9 @@ class FitsDialogue(Toplevel):
         print(file)
         cwd = os.getcwd()
         self._save_persistent_paths(save_path=cwd)
-        path = cwd + '/' + file
-        hdu = self.parent.maniple.buffers['A'].get()
+        path = cwd + IoPanel.path_separator + file
+        buffer = Globals.get_buffer('A')
+        hdu = buffer.block
         fits.writeto(path, hdu, header=None, overwrite=True)
         if not self.validate():
             self.initial_focus.focus_set()  # put focus back

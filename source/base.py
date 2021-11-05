@@ -15,9 +15,9 @@ class Base(tk.Tk):
 
         io_panel = IoPanel(self)
         maths_panel = MathsPanel(self)
-        phot_command = PhotCommand(4.0, 2.0, 2.0)
+#        phot_command = PhotCommand(10.0, 1.1, 1.3)
         image_panel = ImagePanel(self)
-        phot_panel = PhotPanel(self, image_panel, phot_command)
+        phot_panel = PhotPanel(self, image_panel)
         plot_panel = PlotPanel(self)
 
         io_panel.grid(row=0, column=0, sticky="we")

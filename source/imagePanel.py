@@ -91,12 +91,14 @@ class ImagePanel(Panel):
 
     def _toxy(self, event):
         is_valid = False
-        (x, y, c, r) = (-1.0, -1.0, -1, -1)
+        x, y, c, r = -1.0, -1.0, -1, -1
+
         if event.xdata is not None and event.ydata is not None:
             x, y = event.xdata, event.ydata
             c, r = int(x + 0.5), int(y + 0.5)
-            xy_max = self.image.shape
-            if c < xy_max[1] and r < xy_max[0]:
+            xmax = self.xmax_control.get_val()
+            ymax = self.ymax_control.get_val()
+            if c < xmax and r < ymax:
                 is_valid = True
         return is_valid, x, y, c, r
 
