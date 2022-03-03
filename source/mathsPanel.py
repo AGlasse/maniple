@@ -1,4 +1,6 @@
 #!/usr/bin/python
+import scipy.ndimage
+
 from panel import Panel
 from globals import Globals
 import numpy as np
@@ -9,18 +11,19 @@ class MathsPanel(Panel):
 
     icons = ['maths_aplusb', 'maths_aminusb', 'maths_amultb', 'maths_adivb',
              'maths_aplusc', 'maths_aminusc', 'maths_amultc', 'maths_adivc',
-             'maths_norm', 'maths_log']
+             'maths_norm', 'maths_log', 'maths_smooth']
     tts = ['A + B', 'A - B', 'A x B', 'A / B',
            'A + c', 'A - c', 'A x c', 'A / c',
-           'Normalise frame', 'Log10']
-    norm_idx = len(tts) - 2
-    log_idx = len(tts) - 1
+           'Normalise frame', 'Log10', 'Gaussian smooth']
+    norm_idx = len(tts) - 3
+    log_idx = len(tts) - 2
+    smooth_idx = len(tts) - 1
 
     def __init__(self, maniple):
         Panel.__init__(self, maniple)
         self.maniple = maniple
-        rows = [1, 1, 2, 2, 1, 1, 2, 2, 1, 2]
-        cols = [0, 1, 0, 1, 3, 4, 3, 4, 6, 6]
+        rows = [1, 1, 2, 2, 1, 1, 2, 2, 1, 2, 1]
+        cols = [0, 1, 0, 1, 3, 4, 3, 4, 6, 6, 7]
         n_ops = len(self.icons)
         for i in range(0, n_ops):
             tooltip = self.tts[i]
@@ -39,17 +42,20 @@ class MathsPanel(Panel):
         a = Globals.buffers['A'].block
         z = a
         b = Globals.buffers['B'].block
-        c = int(float(self.con_entry.get()))
+        c = float(self.con_entry.get())
         max_bin_idx = 3
         idx = op_idx
         is_norm = op_idx is self.norm_idx
         is_log = op_idx is self.log_idx
+        is_smooth = op_idx is self.smooth_idx
 
-        if is_norm or is_log:
+        if is_norm or is_log or is_smooth:
             if is_norm:
                 self._norm()
             if is_log:
                 self._log()
+            if is_smooth:
+                self._smooth()
         else:
             if op_idx > max_bin_idx:        # Trap unary operations
                 idx = op_idx - 4
@@ -93,10 +99,19 @@ class MathsPanel(Panel):
         return
 
     def _log(self):
-
         block = Globals.buffers['A'].block
         b = np.log10(block)
         Globals.buffers['A'].block = b
         base = self.get_base()
         base.refresh()
         return
+
+    def _smooth(self):
+        block = Globals.buffers['A'].block
+        z = scipy.ndimage.gaussian_filter(block, 2.0)
+        Globals.buffers['A'].block = z
+        base = self.get_base()
+        base.refresh()
+        return
+
+

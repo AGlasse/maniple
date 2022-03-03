@@ -74,7 +74,7 @@ class PhotCommand(Command):
     def do_photometry(self, image):
         """ Analyse the nearest star-like object to the cursor. """
 
-        from photutils import CircularAperture, aperture_photometry, centroid_2dg
+        from photutils import CircularAperture
 
         xbl = ImagePanel.xmin_control.get_val()
         ybl = ImagePanel.ymin_control.get_val()
