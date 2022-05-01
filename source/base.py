@@ -15,16 +15,15 @@ class Base(tk.Tk):
 
         io_panel = IoPanel(self)
         maths_panel = MathsPanel(self)
-#        phot_command = PhotCommand(10.0, 1.1, 1.3)
         image_panel = ImagePanel(self)
         phot_panel = PhotPanel(self, image_panel)
         plot_panel = PlotPanel(self)
 
-        io_panel.grid(row=0, column=0, sticky="we")
-        maths_panel.grid(row=0, column=1, sticky="we")
-        image_panel.grid(row=1, column=0, columnspan=1, rowspan=2, sticky="nsew")
-        phot_panel.grid(row=1, column=1, sticky="wens")
-        plot_panel.grid(row=2, column=1, sticky="nw")
+        image_panel.grid(row=0, column=0, rowspan=4, sticky="nsew")
+        io_panel.grid(row=0, column=1, sticky="nwe")
+        maths_panel.grid(row=1, column=1, sticky="nwe")
+        phot_panel.grid(row=2, column=1, sticky="nswe")
+        plot_panel.grid(row=3, column=1, sticky="nw")
 
         self.image_panel = image_panel
         self.plot_panel = plot_panel

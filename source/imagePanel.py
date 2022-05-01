@@ -26,36 +26,37 @@ class ImagePanel(Panel):
         self.canvas.draw()
         self.canvas.mpl_connect('button_press_event', self._on_click)
         self.canvas.mpl_connect('motion_notify_event', self._on_move)
-        self.canvas.get_tk_widget().grid(row=0, column=0, rowspan=3, columnspan=4)
+        self.canvas.get_tk_widget().grid(row=0, column=0, rowspan=3, columnspan=5)
 
         IP = ImagePanel
         IP.xmin_control = Slider(self, text='X min', orient=HORIZONTAL,
-                                 row=3, column=0, sticky="new")
+                                 row=3, column=0, rowspan=2, sticky="new")
         IP.xmax_control = Slider(self, text='X max', orient=HORIZONTAL,
-                                 row=3, column=3, sticky="new")
+                                 row=3, column=4, rowspan=2, sticky="new")
 
         IP.ymin_control = Slider(self, text='Y min', orient=VERTICAL,
-                                 row=2, column=4, sticky="nsw")
+                                 row=2, column=5, sticky="nsw")
         IP.ymax_control = Slider(self, text='Y max', orient=VERTICAL,
-                                 row=0, column=4, sticky="nsw")
+                                 row=0, column=5, sticky="nsw")
 
-        IP.z_scale = Slider(self, text='Z layer', orient=VERTICAL, row=3, column=4)
-        IP.c_scale = Slider(self, text='Cube', orient=VERTICAL, row=3, column=5)
+        IP.z_scale = Slider(self, text='Z layer', orient=VERTICAL, row=3, column=5, rowspan=2)
+        IP.c_scale = Slider(self, text='Cube', orient=VERTICAL, row=3, column=6, rowspan=2)
         IP.b_scale = Slider(self, text='Buffer', orient=VERTICAL,
-                            row=3, column=6, textvals=['A', 'B'], val='A')
+                            row=3, column=7, rowspan=2,
+                            textvals=['A', 'B'], val='A')
 
         self.make_button(icon_name='im_uncrop', row=3, column=2,
                 tt='Restore image to full frame',
                 lcom=lambda: self.uncrop())
 
         crop_command = CropCommand()
-        self.make_button(icon_name='im_crop',  row=4, column=2,
+        self.make_button(icon_name='im_crop',  row=3, column=3,
                 tt='Click to select the crop box ',
                 lcom=lambda: self.start_command(crop_command))
         self.crop_command = crop_command
 
         IP.value_panel = ValuePanel(self)
-        IP.value_panel.grid(row=1, column=4, columnspan=2, sticky="nsew")
+        IP.value_panel.grid(row=1, column=5, columnspan=2, sticky="nsew")
         return
 
     def start_command(self, command):
@@ -186,7 +187,7 @@ class ImagePanel(Panel):
         axes.set_aspect('equal', 'box')
         axes.imshow(self.image,
               extent=(xmin-0.5, xmax+0.5, ymin-0.5, ymax+0.5),
-              interpolation='nearest', cmap='hot',
+              interpolation='nearest', cmap='inferno',  #'binary',
               vmin=vpmin, vmax=vpmax, origin='lower')
         self.command.plot(axes)
         self.canvas.draw()
