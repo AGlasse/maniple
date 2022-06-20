@@ -1,2 +1,2 @@
-G:\FLIGHT\OTE-034 PID-1171 SIAF update\1171_old_cal\visit1.1
-D:\MIRI\Commissioning\CARs\MIR-007 1024 Imager plate scale and distortion\Simulation
+D:\MIRI\Commissioning\CAPs\CAP-106
+D:\MIRI\Commissioning\CAPs\CAP-106

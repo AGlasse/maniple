@@ -134,11 +134,11 @@ class ImagePanel(Panel):
         IP = ImagePanel
         IP.xmin_control.set_bounds(xmax-1, 0)
         IP.xmin_control.set_val(0)
-        IP.xmax_control.set_bounds(xmax-1, 0)
+        IP.xmax_control.set_bounds(2*xmax-1, 0)
         IP.xmax_control.set_val(xmax-1)
         IP.ymin_control.set_bounds(0, ymax-1)
         IP.ymin_control.set_val(0)
-        IP.ymax_control.set_bounds(0, ymax-1)
+        IP.ymax_control.set_bounds(0, 2*ymax-1)
         IP.ymax_control.set_val(ymax-1)
         return buffer, cmax, zmax
 
@@ -174,6 +174,11 @@ class ImagePanel(Panel):
         vpmin, vpmax = self.value_panel.getplotlimits()
 
         self.image = self.frame[ymin:ymax+1, xmin:xmax+1]
+        Globals.image = self.image
+        ymax_im, xmax_im = self.image.shape
+#        print(xmax, xmax_im)
+        xmax_im = xmax_im if xmax_im <= xmax else xmax
+        ymax_im = ymax_im if ymax_im <= ymax else ymax
 
         vmin = np.nanmin(self.image)
         vmax = np.nanmax(self.image)
@@ -186,7 +191,7 @@ class ImagePanel(Panel):
         axes.set_ylim(ymin-1, ymax+1)
         axes.set_aspect('equal', 'box')
         axes.imshow(self.image,
-              extent=(xmin-0.5, xmax+0.5, ymin-0.5, ymax+0.5),
+              extent=(xmin-0.5, xmax_im+0.5, ymin-0.5, ymax_im+0.5),
               interpolation='nearest', cmap='inferno',  #'binary',
               vmin=vpmin, vmax=vpmax, origin='lower')
         self.command.plot(axes)

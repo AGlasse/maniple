@@ -37,7 +37,7 @@ class IoPanel(Panel):
         self._make_load_widget(1, font, row=2)
         tt = 'Save buffer A to fits file'
         lcom = lambda: self._launch_fits_dialogue('save')
-        self.make_button(icon_name='io_saveFits', lcom=lcom, tt=tt, row=1, column=3)
+        self.make_button(icon_name='io_saveFits', lcom=lcom, tt=tt, row=3, column=0)
         return
 
     def _display_buffer(self, buff_name):
@@ -246,9 +246,10 @@ class FitsDialogue(Toplevel):
         cwd = os.getcwd()
         self._save_persistent_paths(save_path=cwd)
         path = cwd + IoPanel.path_separator + file
-        buffer = Globals.get_buffer('A')
-        hdu = buffer.block
-        fits.writeto(path, hdu, header=None, overwrite=True)
+#        buffer = Globals.get_buffer('A')
+#        frame = Globals.image
+#        hdu = buffer.block
+        fits.writeto(path, Globals.image, header=None, overwrite=True)
         if not self.validate():
             self.initial_focus.focus_set()  # put focus back
             return
