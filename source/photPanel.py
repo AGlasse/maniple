@@ -39,7 +39,6 @@ class PhotPanel(Panel):
                         tt='centroid y')
         self.make_label(textvariable=phot_command.v_phot, column=6,
                         tt='sum of signal in aperture')
-
         self.phot_command = phot_command
 
     def set_hover(self, x, y, val):

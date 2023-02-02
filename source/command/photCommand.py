@@ -1,7 +1,7 @@
 #!/usr/bin/python
 import numpy as np
 import math
-from command import Command
+from source.command.command import Command
 from tkinter import StringVar
 
 
@@ -87,7 +87,7 @@ class PhotCommand(Command):
                 ees_rms:
                 ees_all: EE profile averaged for all images
         """
-        from photutils import CircularAperture, aperture_photometry, centroid_2dg
+        from photutils import CircularAperture, aperture_photometry
 
         debug = kwargs.get('debug', False)
         is_log = kwargs.get('log10sampling', True)  # Use sampling equispaced in log10

@@ -4,11 +4,13 @@ from ioPanel import IoPanel
 from imagePanel import ImagePanel
 from plotPanel import PlotPanel
 import tkinter as tk
-from photCommand import PhotCommand
+from source.command.photCommand import PhotCommand
 from photPanel import PhotPanel
 
 
 class Base(tk.Tk):
+
+    image_panel = None
 
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)

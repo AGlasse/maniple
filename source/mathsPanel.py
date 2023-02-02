@@ -36,9 +36,9 @@ class MathsPanel(Panel):
     def _oper(self, op_idx):
         """ Implement maths operations A oper B -> A
         """
-        a = Globals.buffers['A'].block
+        a = Globals.buffers['A'].get()
         z = a
-        b = Globals.buffers['B'].block
+        b = Globals.buffers['B'].get()
         c = int(float(self.con_entry.get()))
         max_bin_idx = 3
         idx = op_idx
