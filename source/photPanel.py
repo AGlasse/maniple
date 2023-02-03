@@ -1,10 +1,11 @@
 from panel import Panel
 from tkinter import StringVar
+from photCommand import PhotCommand
 
 
 class PhotPanel(Panel):
 
-    def __init__(self, parent, image_panel, phot_command):
+    def __init__(self, parent, image_panel):
         Panel.__init__(self, parent)
 
         self.config(row=0)
@@ -22,15 +23,17 @@ class PhotPanel(Panel):
         aper_button.config(command=lambda: image_panel.start_command(phot_command))
 
         self.config(width=9)
-        r_entry = self.make_entry(val=phot_command.r1,
+        r1, rratio, aratio = StringVar(self, '10.0'), StringVar(self, '1.1'), StringVar(self, '1.3')
+        r_entry = self.make_entry(textvariable=r1,
                                   fmt='{:5.1f}', column=1)
         r_entry.bind("<Return>", image_panel.on_change)
-        rratio_entry = self.make_entry(val=phot_command.rratio,
+        rratio_entry = self.make_entry(textvariable=rratio,
                                        fmt='{:5.1f}', column=2)
         rratio_entry.bind("<Return>", image_panel.on_change)
-        aratio_entry = self.make_entry(val=phot_command.aratio,
+        aratio_entry = self.make_entry(textvariable=aratio,
                                        fmt='{:5.1f}', column=3)
         aratio_entry.bind("<Return>", image_panel.on_change)
+        phot_command = PhotCommand(r1, rratio, aratio)
 
         self.config(row=1)
         self.make_label(textvariable=phot_command.x_cen, column=4,

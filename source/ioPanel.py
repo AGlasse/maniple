@@ -37,7 +37,7 @@ class IoPanel(Panel):
         self._make_load_widget(1, font, row=2)
         tt = 'Save buffer A to fits file'
         lcom = lambda: self._launch_fits_dialogue('save')
-        self.make_button(icon_name='io_saveFits', lcom=lcom, tt=tt, row=1, column=3)
+        self.make_button(icon_name='io_saveFits', lcom=lcom, tt=tt, row=3, column=0)
         return
 
     def _display_buffer(self, buff_name):
@@ -106,8 +106,6 @@ class FitsDialogue(Toplevel):
         text = 'Click on file to show data units'
         Tooltip(self.filebox, text=text, wraplength=200)
         load_path, save_path = self._load_persistent_paths()
-#        self.hdu_panel = HDUPanel(self)
-#        self.hdu_panel.grid(row=1, column=4)
 
         # If loading, prevent file overwriting and display HDU parameters
         if func == 'load':
@@ -116,7 +114,7 @@ class FitsDialogue(Toplevel):
             except Exception:
                 os.chdir('..')
             self.filebox.bind("<Button-1>", self.inspect)
-        if func == 'save':       # Include file name entry
+        if func == 'save':                          # Include file name entry
             os.chdir(save_path)
             self.fits_name = StringVar()
             self.fits_name.set('newfile.fits')
@@ -242,24 +240,25 @@ class FitsDialogue(Toplevel):
         box.grid()
         return
 
-    def ok_save(self):      # , event=None):
+    def ok_save(self):
         file = self.fits_name.get()
         print(file)
         cwd = os.getcwd()
         self._save_persistent_paths(save_path=cwd)
-        path = cwd + '/' + file
-        hdu = self.parent.maniple.buffers['A'].get()
-        fits.writeto(path, hdu, header=None, overwrite=True)
+        path = cwd + IoPanel.path_separator + file
+#        buffer = Globals.get_buffer('A')
+#        frame = Globals.image
+#        hdu = buffer.block
+        fits.writeto(path, Globals.image, header=None, overwrite=True)
         if not self.validate():
             self.initial_focus.focus_set()  # put focus back
             return
         self.destroy()
 
-    def load_hdu(self, hdu):
+    def load_hdu(self, hdu_name):
         import numpy as np
         from globals import Globals
 
-        hdu_name = hdu.name
         file = self.filebox.get(tk.ACTIVE)
         cwd = os.getcwd()
         self._save_persistent_paths(load_path=cwd)
@@ -269,18 +268,22 @@ class FitsDialogue(Toplevel):
             self.parent.name_vars[0].set(image_name)
         else:
             self.parent.name_vars[1].set(image_name)
-        datacube = hdu.data
-        shape = datacube.shape
-        ndim = len(shape)
-        for dim in range(ndim, 4):        # eg single frame y, x, -> int,frame,y,x
-            datacube = np.expand_dims(datacube, axis=0)
-        print("Writing {:s} to buffer {:s}".format(file, self.buffer_id))
-        Globals.load_buffer(self.buffer_id, datacube)
-#        Globals.set_display_buffer(self.buffer_id)
-        base = self.parent.get_base()
-        base.reset()
-        base.refresh()
-        self.destroy()
+
+        hdu_list = fits.open(path, mode='readonly')
+        for hdu in hdu_list:
+            if hdu_name == hdu.name:
+                datacube = hdu.data
+                shape = datacube.shape
+                ndim = len(shape)
+                for dim in range(ndim, 4):        # eg single frame y, x, -> int,frame,y,x
+                    datacube = np.expand_dims(datacube, axis=0)
+                print("Writing {:s} to buffer {:s}".format(file, self.buffer_id))
+                Globals.load_buffer(self.buffer_id, datacube)
+                base = self.parent.get_base()
+                base.reset()
+                base.refresh()
+                self.destroy()
+                return
         return
 
     def cancel(self):       # , event=None):
@@ -316,7 +319,8 @@ class HDUPanel(Panel):
                 size_label = ttk.Label(self, text=size_text[:-2])
                 size_label.grid(row=row, column=6, padx=5, pady=5)
                 image_button = ttk.Button(self, text="Load Image", width=10)
-                image_button.bind("<ButtonRelease>", lambda event, hdu_=hdu: parent.load_hdu(hdu_))
+                hdu_name = hdu.name
+                image_button.bind("<ButtonRelease>", lambda event, hdu_name_=hdu_name: parent.load_hdu(hdu_name_))
                 image_button.grid(row=row, column=7, padx=5, pady=5)
             row = row + 1
         return

@@ -6,9 +6,9 @@ class ValuePanel(Panel):
 
     def __init__(self, parent):
         Panel.__init__(self, parent)
-        self.vmax = StringVar()
 
         vmax_label = self.make_label(tt='Maximum pixel value', row=0, column=0)
+        self.vmax = StringVar()
         vmax_label.config(textvariable=self.vmax)
         vmax_plot_entry = self.make_entry(val=100.0, fmt='{:10.3e}',
                                           width=9, row=1, tt='Maximum plotted value')
