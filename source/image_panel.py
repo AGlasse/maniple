@@ -1,8 +1,9 @@
 #!/usr/bin/python
+import time
 from tkinter import *
 from valuePanel import ValuePanel
 from panel import Panel
-from source.command.cropCommand import CropCommand
+from source.command.crop_command import CropCommand
 from globals import Globals
 import matplotlib as plt
 from matplotlib.figure import Figure
@@ -24,15 +25,15 @@ class ImagePanel(Panel):
     def __init__(self, parent):
         Panel.__init__(self, parent)
 
-        fs = self.IMAGE_SIZE
+        fs = self.fig_size
         f = Figure(figsize=(fs, fs), dpi=100)
         self.imax = f.add_subplot(111)
         self.canvas = FigureCanvasTkAgg(f, self)
-        self.canvas.draw()
         self.canvas.mpl_connect('button_press_event', self._mouse_button_pressed)
         self.canvas.mpl_connect('button_release_event', self._mouse_button_released)
         self.canvas.mpl_connect('motion_notify_event', self._mouse_motion)
         self.canvas.get_tk_widget().grid(row=0, column=0, rowspan=3, columnspan=4)
+        self.canvas.draw()
 
         ip = ImagePanel
         ip.xmin_control = Slider(self, text='X min', orient=HORIZONTAL,
@@ -61,6 +62,7 @@ class ImagePanel(Panel):
     def start_command(self, command):
         self.active_command = command
         self.active_command.start()
+        return
 
     def on_change(self):
         base = self.get_base()
@@ -89,27 +91,25 @@ class ImagePanel(Panel):
         base.refresh()
         return
 
-    def _toxy(self, event):
+    @staticmethod
+    def _toxy(event):
         is_valid = False
         x, y, c, r = -1.0, -1.0, -1, -1
         if event.xdata is not None and event.ydata is not None:
             x, y = event.xdata, event.ydata
             c, r = int(x + 0.5), int(y + 0.5)
-            r_max, c_max = self.image.shape
-            c = c if c < c_max else c_max
-            r = r if r < r_max else r_max
             is_valid = True
         return is_valid, x, y, c, r
 
     def _mouse_motion(self, event):
-        if self.active_command is not None:
-            is_valid, x, y, c, r = self._toxy(event)
-            if is_valid:
-                val = self.frame[r, c]
-                base = self.get_base()
-                base.phot_panel.set_hover(x, y, val)
+        is_valid, x, y, c, r = ImagePanel._toxy(event)
+        if is_valid:                        # Cursor is moving in image panel
+            val = self.frame[r, c]          # Update position and value labels in phot_panel
+            base = self.get_base()
+            base.phot_panel.set_hover(x, y, val)
+            if self.active_command is not None:     # Update any active image commands
                 self.active_command.mouse_motion(x, y)
-                self.refresh()
+            self.refresh()
         return
 
     def _mouse_button_released(self, event):
@@ -124,8 +124,11 @@ class ImagePanel(Panel):
                 if self.active_command is not None:
                     is_done = self.active_command.mouse_button_pressed(event, xc, yc, self)
                 else:
-                    self.active_command = CropCommand()
-                    self.active_command.start(xc, yc)
+                    if event.key == 'shift':
+                        self.active_command = CropCommand()
+                        self.active_command.start(xc, yc)
+                    else:                    # Update pixel coordinate widgets.
+                        Globals.cursor_position = xc, yc
         if is_done or is_cancelled:
             self.active_command = None
             self.refresh()
@@ -192,6 +195,9 @@ class ImagePanel(Panel):
         ax.set_aspect('equal', 'box')
         ax.imshow(self.image, extent=(xmin-0.5, xmax+0.5, ymin-0.5, ymax+0.5),
                   interpolation='nearest', cmap='hot', vmin=vpmin, vmax=vpmax, origin='lower')
+        if Globals.cursor_position is not None:
+            xc, yc = Globals.cursor_position
+            ax.plot(xc, yc, marker='+', color='green')
         if self.active_command is not None:
             self.active_command.plot(ax)
         self.canvas.draw()

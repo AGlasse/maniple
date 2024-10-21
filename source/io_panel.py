@@ -73,8 +73,9 @@ class IoPanel(Panel):
 
     def _launch_fits_dialogue(self, func, **kwargs):
         buffer_id = kwargs.get('buffer_id', 0)
-        fits_dialogue = FitsDialogue(self, func, buffer_id)
+        _ = FitsDialogue(self, func, buffer_id)
         return
+
 
 class FitsDialogue(Toplevel):
     """ Dialogue which extends 'Toplevel' to select a fits file, display its
@@ -111,8 +112,9 @@ class FitsDialogue(Toplevel):
         if func == 'load':
             try:
                 os.chdir(load_path)
-            except Exception:
-                os.chdir('..')
+            except FileNotFoundError:
+                # os.chdir('..')
+                print('Path ' + load_path + ' not found!')
             self.filebox.bind("<Button-1>", self.inspect)
         if func == 'save':                          # Include file name entry
             os.chdir(save_path)
@@ -246,9 +248,6 @@ class FitsDialogue(Toplevel):
         cwd = os.getcwd()
         self._save_persistent_paths(save_path=cwd)
         path = cwd + IoPanel.path_separator + file
-#        buffer = Globals.get_buffer('A')
-#        frame = Globals.image
-#        hdu = buffer.block
         fits.writeto(path, Globals.image, header=None, overwrite=True)
         if not self.validate():
             self.initial_focus.focus_set()  # put focus back

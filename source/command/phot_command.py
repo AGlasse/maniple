@@ -3,76 +3,96 @@ import numpy as np
 import math
 from source.command.command import Command
 from tkinter import StringVar
+from photutils import CircularAperture, aperture_photometry
+from photutils.centroids import centroid_com
 
 
 class PhotCommand(Command):
 
-    def __init__(self, r1, rratio, aratio):
+    def __init__(self, r1, rratio):
         Command.__init__(self)
-        self.xc = 0
-        self.yc = 0
-        self.set_aperture(r1, rratio, aratio)
+        self.ap_coords = self.update_aperture_coords(float(r1.get()), float(rratio.get()))
+        self.do_centroid, self.do_skysub = None, None
+
+        self.x_cursor = 0
+        self.y_cursor = 0
         self.x_cen = StringVar()
         self.y_cen = StringVar()
         self.v_phot = StringVar()
         self.x_cen.set('{:6.2f}'.format(0.))
         self.y_cen.set('{:6.2f}'.format(0.))
         self.v_phot.set('{:10.3f}'.format(0.))
-
+        return
 
     def start(self):
         self.state = self.EDITING
+        return
 
-    def set_aperture(self, r1, rratio, aratio):
-        arad = np.arange(0.0, 2.0*math.pi + 0.1, 0.1)
-        # Photometric aperture
-        x1 = r1 * np.sin(arad)
-        y1 = r1 * np.cos(arad)
-        # Inner circumference of sky annulus
-        x2 = np.multiply(x1, rratio)
-        y2 = np.multiply(y1, rratio)
-        # Outer circumference of sky annulus
-        k = math.sqrt(aratio + rratio*rratio)
-        x3 = np.multiply(x1, k)
-        y3 = np.multiply(y1, k)
-        self.r1 = r1
-        self.rratio = rratio
-        self.aratio = aratio
-        self.xys = np.asarray((x1, y1, x2, y2, x3, y3))
-
-    def plot(self, axes):
-        cols = ['red', 'green', 'green']
-        for i in range(0, 3):
-            x = self.xys[2*i] + self.xc
-            y = self.xys[2*i+1] + self.yc
-            axes.plot(x, y, color=cols[i])
-
-    def process_click(self, event, x, y, image_panel):
+    def mouse_button_pressed(self, event, x, y, image_panel):
         is_done = False
         if self.state is self.EDITING:
+            print('running photometry')
             self.do_photometry(image_panel.image)
             self.state = self.STANDBY
             is_done = True
         else:
-            print('command.process_click - no valid state')
+            print('phot_command.process_click - no valid state')
         return is_done
 
-    def process_move(self, xc, yc):
-        if self.state is self.EDITING:
-            self.xc = xc
-            self.yc = yc
+    def mouse_motion(self, xc, yc):
+        self.x_cursor, self.y_cursor = xc, yc
+        return
+
+    def plot(self, ax):
+        """ Overplot annulus on image.
+        """
+        _, _, _, xys = self.ap_coords
+        cols = ['green', 'blue', 'blue']
+        for i in range(0, 3):
+            x = xys[i][0] + self.x_cursor
+            y = xys[i][1] + self.y_cursor
+            ax.plot(x, y, color=cols[i])
+        return
+
+    @staticmethod
+    def update_aperture_coords(r_tgt, ksky_inner):
+        ksky_outer = math.sqrt(1 + ksky_inner * ksky_inner)
+        r_inner = r_tgt * ksky_inner
+        r_outer = r_tgt * ksky_outer
+        arad = np.arange(0.0, 2.0 * math.pi + 0.1, 0.1)       # Angle coordinate
+        sin_a, cos_a = np.sin(arad), np.cos(arad)
+        # Photometric aperture coordinates
+        xys = []
+        for r in [r_tgt, r_inner, r_outer]:
+            x, y = np.multiply(sin_a, r), np.multiply(cos_a, r)
+            xys.append([x, y])
+        ap_coords = r_tgt, r_inner, r_outer, xys
+        return ap_coords
 
     def do_photometry(self, image):
-        from photutils import CircularAperture, aperture_photometry, centroid_2dg
 
-        position = [(self.xc, self.yc)]
-        aperture = CircularAperture(position, r=self.r1)
-        phot_table = aperture_photometry(image, aperture)
-        vphot = phot_table['aperture_sum'][0]
-        mask = self.make_mask(image, position, self.r1)
-        (xcen, ycen) = centroid_2dg(image, mask=mask)
-        self.x_cen.set('{:6.2f}'.format(xcen))
-        self.y_cen.set('{:6.2f}'.format(ycen))
+        r_tgt, r_inner, r_outer, xys = self.ap_coords
+
+        position = [(self.x_cursor, self.y_cursor)]
+        if self.do_centroid:
+            position = centroid_com(image)
+
+        radii = [r_tgt]
+        if self.do_skysub:
+            radii.append(r_inner)
+            radii.append(r_outer)
+        vals = []
+        for r in radii:
+            aperture = CircularAperture(position, r=r)
+            phot_table = aperture_photometry(image, aperture)
+            val = phot_table['aperture_sum'][0]
+            vals.append(val)
+        vphot = vals[0]
+        if self.do_skysub:
+            vsky = vals[2] - vals[1]
+            vphot -= vsky
+        self.x_cen.set('{:6.2f}'.format(position[0]))
+        self.y_cen.set('{:6.2f}'.format(position[1]))
         self.v_phot.set('{:10.3f}'.format(vphot))
         return
 
@@ -115,8 +135,8 @@ class PhotCommand(Command):
 
         for i in range(0, n_points):        # One radial point per row
             r = radii[i]      # Increase aperture width to measure spectral cog profile
-            position = [(self.xc, self.yc)]
-            aperture = CircularAperture(position, r=self.r1)
+            position = [(self.x_cursor, self.y_cursor)]
+            aperture = CircularAperture(position, r=self.r_tgt)
             phot_table = aperture_photometry(image, aperture)
 #            ees_all[i,j] = LMSIQAnalyse.exact_rectangular(image, aperture)
         return

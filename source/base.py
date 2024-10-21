@@ -1,19 +1,20 @@
 #!/usr/bin/python
 from mathsPanel import MathsPanel
-from ioPanel import IoPanel
-from imagePanel import ImagePanel
-from plotPanel import PlotPanel
+from io_panel import IoPanel
+from image_panel import ImagePanel
+from plot_panel import PlotPanel
+from phot_panel import PhotPanel
 import tkinter as tk
-from source.command.photCommand import PhotCommand
-from photPanel import PhotPanel
 
 
 class Base(tk.Tk):
 
     image_panel = None
+    active_commands = []
 
-    def __init__(self, *args, **kwargs):
-        tk.Tk.__init__(self, *args, **kwargs)
+    def __init__(self):     # , *args, **kwargs):
+        tk.Tk.__init__(self)        # *args, **kwargs)
+        self.grid()
 
         io_panel = IoPanel(self)
         maths_panel = MathsPanel(self)
@@ -21,7 +22,7 @@ class Base(tk.Tk):
         phot_panel = PhotPanel(self, image_panel)
         plot_panel = PlotPanel(self)
 
-        image_panel.grid(row=0, column=0, rowspan=4, sticky="nsew")
+        image_panel.grid(row=0, column=0, rowspan=4, sticky="nw")
         io_panel.grid(row=0, column=1, sticky="nwe")
         maths_panel.grid(row=1, column=1, sticky="nwe")
         phot_panel.grid(row=2, column=1, sticky="nswe")
@@ -39,6 +40,7 @@ class Base(tk.Tk):
         """ Refresh displayed image
         """
         if self.image_panel is not None:
+            # time.sleep(0.2)
             self.image_panel.refresh()
             self.plot_panel.refresh()
         return

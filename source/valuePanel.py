@@ -7,7 +7,9 @@ class ValuePanel(Panel):
     def __init__(self, parent):
         Panel.__init__(self, parent)
 
-        vmax_label = self.make_label(tt='Maximum pixel value', row=0, column=0)
+        vmax_label = self.make_label(tt='Maximum pixel value',
+                                     row=0, column=0,
+                                     fmt='{:10.3e}', width=9)
         self.vmax = StringVar()
         vmax_label.config(textvariable=self.vmax)
         vmax_plot_entry = self.make_entry(val=100.0, fmt='{:10.3e}',
@@ -34,7 +36,9 @@ class ValuePanel(Panel):
 
         self.vmin = StringVar()
         self.setlimits(0.0, 1.0)
-        self.make_label(textvariable=self.vmin, row=6, tt='Minimum pixel value')
+        self.make_label(textvariable=self.vmin, row=6,
+                        tt='Minimum pixel value',
+                        fmt='{:10.3e}', width=9)
         return
 
     def setlimits(self, vmin, vmax):

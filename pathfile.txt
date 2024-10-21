@@ -1,2 +1,2 @@
-D:\MIRI\Commissioning\CARs\MIR-013 1029 MRS and LRS Target Acquisition\MAST_2023-01-30T0514\JWST\jw01029010001_03102_00001_mirifushort
+D:\Users\hkn21281\PycharmProjects\lmsiq\output
 D:\MIRI\Commissioning\CARs\MIR-007 1024 Imager plate scale and distortion\Flight Data\1024_pipelined

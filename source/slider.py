@@ -1,6 +1,6 @@
 #!/usr/bin/python
-from tkinter import *
-from tkinter import ttk
+# from tkinter import *
+from tkinter import ttk, StringVar, HORIZONTAL
 from panel import Panel
 
 
@@ -28,14 +28,17 @@ class Slider(Panel):
         self.grid(row=row, column=column, sticky=sticky)
         orient = kwargs.get('orient', HORIZONTAL)
 
-        self.make_label(textvariable=self.lo_text, width=10, row=3, column=0)
-        self.make_label(textvariable=self.hi_text, width=10, row=0, column=0)
-        val_entry = self.make_entry(textvariable=self.val_text, row=1, column=0)
-        val_entry.bind("<Return>", self._on_entry_changed)
+        rows, cols, span = [0, 1, 2, 3], [0, 0, 0, 0], 1
+        if orient == HORIZONTAL:
+            rows, cols, span = [0, 0, 1, 0], [0, 1, 1, 3], 3
 
-        self.make_label(text=text, row=4, column=0)
+        self.make_label(textvariable=self.hi_text, width=5, row=rows[0], column=cols[0])
+        val_entry = self.make_entry(textvariable=self.val_text, row=rows[1], column=cols[1])
+        val_entry.bind("<Return>", self._on_entry_changed)
         self.scale = ttk.Scale(self, orient=orient, command=self._on_slider_changed)
-        self.scale.grid(row=2, column=0)
+        self.scale.grid(row=rows[2], column=cols[2], columnspan=span)
+        self.make_label(textvariable=self.lo_text, width=5, row=rows[3], column=cols[3])
+
         self.set_bounds(minval, maxval)
         self.set_val(0)
         return

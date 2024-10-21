@@ -13,13 +13,12 @@ class Panel(ttk.Frame):
         self.parent = parent
         screen_width = ttk.Frame.winfo_screenwidth(self)
         idx = int(screen_width / 1000)
-        idx = 0
         fontsize = [10, 12, 24][idx]
         self.LARGE_FONT = ('Helvetica', fontsize)
         self.ICON_HEIGHT = [15, 20, 50][idx]
-        self.IMAGE_SIZE = [6, 8, 18][idx]
-        pw = [5, 5, 12][idx]
-        ph = [3, 3, 8][idx]
+        self.fig_size = [6, 6.5, 18][idx]
+        pw = [5, 6, 12][idx]
+        ph = [3, 4, 8][idx]
         self.PLOT_SIZE = (pw, ph)
         self.BUTTON_PAD = [1, 1, 3][idx]
         self.width = [4, 5, 12][idx]
@@ -69,7 +68,7 @@ class Panel(ttk.Frame):
                     element, style.element_options(element)))
         except tk.TclError:
             print('_tkinter.TclError: "{0}" in function'
-                  'widget_elements_options({0}) is not a regonised stylename.'
+                  'widget_elements_options({0}) is not a recognised stylename.'
                   .format(stylename))
 
     def config(self, **kwargs):
@@ -81,30 +80,45 @@ class Panel(ttk.Frame):
         return
 
     def make_label(self, **kwargs):
-        textvariable = kwargs.get('textvariable', None)
-        text = kwargs.get('text', None)
-        tt = kwargs.get('tt', 'Tooltip text')
-        row = kwargs.get('row', self.row)
-        column = kwargs.get('column', self.column)
-        font = kwargs.get('font', self.LARGE_FONT)
-        minsize = kwargs.get('minsize', 1200)
-        label = ttk.Label(self, font=font, style='Man.TLabel', justify=RIGHT)
-        if text is not None:
-            label.config(text=text)
-        if textvariable is not None:
-            label.config(textvariable=textvariable)
-        label.grid(row=row, column=column)
-        label.columnconfigure(1, minsize=minsize)
-        Tooltip(label, text=tt, wraplength=200)
+        label = self._make_text_widget(**kwargs)
         return label
 
+    def make_entry(self, **kwargs):
+        entry = self._make_text_widget(**kwargs, is_entry=True)
+        return entry
+
+    def _make_text_widget(self, **kwargs):
+        is_entry = kwargs.get('is_entry', False)
+        style = 'Man.TEntry' if is_entry else 'Man.TLabel'
+        textvariable = kwargs.get('textvariable', None)
+        val = kwargs.get('val', 0.0)
+        width = kwargs.get('width', self.width)
+        fmt = kwargs.get('fmt', '{:5.1f}')
+        font = kwargs.get('font', self.LARGE_FONT)
+        row = kwargs.get('row', self.row)
+        column = kwargs.get('column', self.column)
+        pad = kwargs.get('pad', self.BUTTON_PAD)
+        tt = kwargs.get('tt', 'Tooltip text')
+        widget = ttk.Entry(self, width=width, justify=RIGHT, font=font, style=style)
+        if textvariable is not None:
+            widget.config(textvariable=textvariable)
+        else:
+            widget.insert(0, fmt.format(val))
+            widget.xview(0)
+        widget.grid(row=row, column=column, sticky=W, padx=pad, pady=pad)
+        Tooltip(widget, text=tt, wraplength=200)
+        return widget
+
     def make_button(self, **kwargs):
+        is_checkbutton = kwargs.get('is_checkbutton', False)
+        intvar = kwargs.get('intvar', 0)
         icon_name = kwargs.get('icon_name', None)
         text = kwargs.get('text', None)
         width = kwargs.get('width', self.width)
         icon_height = kwargs.get('icon_height', self.ICON_HEIGHT)
         row = kwargs.get('row', self.row)
         column = kwargs.get('column', self.column)
+        columnspan = kwargs.get('columnspan', 1)
         pad = kwargs.get('pad', self.BUTTON_PAD)
         lcom = kwargs.get('lcom', None)
         tt = kwargs.get('tt', 'Tooltip text')
@@ -115,30 +129,13 @@ class Panel(ttk.Frame):
             button.image = icon.image
         else:
             if text is not None:
-                button = ttk.Button(self, text=text, width=width)
+                if is_checkbutton:
+                    button = ttk.Checkbutton(self, text=text, variable=intvar)       # , variable=var0, command=cb)
+                else:
+                    button = ttk.Button(self, text=text, width=width)
             else:
                 button = ttk.Button(self, width=width)
-        button.grid(row=row, column=column,
+        button.grid(row=row, column=column, columnspan=columnspan,
                     sticky=W, padx=pad, pady=pad)
         Tooltip(button, text=tt, wraplength=200)
         return button
-
-    def make_entry(self, **kwargs):
-        textvariable = kwargs.get('textvariable', None)
-        val = kwargs.get('val', 0.0)
-        width = kwargs.get('width', self.width)
-        fmt = kwargs.get('fmt', '{:f5.1}')
-        font = kwargs.get('font', self.LARGE_FONT)
-        row = kwargs.get('row', self.row)
-        column = kwargs.get('column', self.column)
-        pad = kwargs.get('pad', self.BUTTON_PAD)
-        tt = kwargs.get('tt', 'Tooltip text')
-        entry = ttk.Entry(self, width=width, justify=RIGHT, font=font, style='M.TEntry')
-        if textvariable is not None:
-            entry.config(textvariable=textvariable)
-        else:
-            entry.insert(0, fmt.format(val))
-            entry.xview(0)
-        entry.grid(row=row, column=column, sticky=W, padx=pad, pady=pad)
-        Tooltip(entry, text=tt, wraplength=200)
-        return entry

@@ -9,18 +9,18 @@ class MathsPanel(Panel):
 
     icons = ['maths_aplusb', 'maths_aminusb', 'maths_amultb', 'maths_adivb',
              'maths_aplusc', 'maths_aminusc', 'maths_amultc', 'maths_adivc',
-             'maths_norm', 'maths_log']
+             'maths_norm', 'maths_log', 'maths_collapse']
     tts = ['A + B', 'A - B', 'A x B', 'A / B',
            'A + c', 'A - c', 'A x c', 'A / c',
-           'Normalise frame', 'Log10']
+           'Normalise frame', 'Log10', 'Z average']
     norm_idx = len(tts) - 2
-    log_idx = len(tts) - 1
+    log_idx = len(tts) - 2
 
     def __init__(self, maniple):
         Panel.__init__(self, maniple)
         self.maniple = maniple
-        rows = [1, 1, 2, 2, 1, 1, 2, 2, 1, 2]
-        cols = [0, 1, 0, 1, 3, 4, 3, 4, 6, 6]
+        rows = [1, 1, 2, 2, 1, 1, 2, 2, 1, 2, 1]
+        cols = [0, 1, 0, 1, 3, 4, 3, 4, 6, 6, 7]
         n_ops = len(self.icons)
         for i in range(0, n_ops):
             tooltip = self.tts[i]
@@ -36,6 +36,7 @@ class MathsPanel(Panel):
     def _oper(self, op_idx):
         """ Implement maths operations A oper B -> A
         """
+        print(op_idx)
         a = Globals.buffers['A'].get()
         z = a
         b = Globals.buffers['B'].get()
@@ -54,6 +55,8 @@ class MathsPanel(Panel):
             if op_idx > max_bin_idx:        # Trap unary operations
                 idx = op_idx - 4
                 b = c
+            if op_idx == 10:
+                z = np.average(a, axis=1, keepdims=True)
             if idx == 0:
                 z = np.add(a, b)
             if idx == 1:

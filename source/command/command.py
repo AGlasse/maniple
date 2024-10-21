@@ -14,19 +14,19 @@ class Command:
         print("Command.start not defined")
         return
 
-    def plot(self, ax):
-        print("Command.plot not defined")
-        return
-
     def mouse_motion(self, x, y):
         print("Command.mouse_motion not defined")
         return
 
     def mouse_button_pressed(self, event, x, y, image_panel):
-        print("Command.mouse_button_process not defined")
+        print("Command.mouse_button_pressed not defined")
         is_done = False
         return is_done
 
     def mouse_button_released(self, event):
         print("Command.mouse_button_released not defined")
+        return
+
+    def plot(self, ax):
+        print("Command.plot not defined")
         return

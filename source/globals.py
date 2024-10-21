@@ -8,6 +8,7 @@ class Globals:
     buffers = {'A': Buffer(), 'B': Buffer()}
     execution_directory = None
     display_buffer_name = 'A'
+    cursor_position = None
 
     def __init__(self):
         Globals.execution_directory = os.getcwd()
