@@ -8,7 +8,8 @@ from globals import Globals
 class PlotPanel(Panel):
 
     mode_dict = {'histogram': 'Plot histogram',
-                 'xyprofile': 'Plot profiles through row/column',
+                 'xprofile': 'Plot along row pofile',
+                 'yprofile': 'Plot along column profile',
                  'zprofile': 'Plot pixel z profile'}
     selected_button = None
 
@@ -26,7 +27,7 @@ class PlotPanel(Panel):
             tt = mode_dict[key]
             button = self.make_button(text=key, tt=tt)
             row += 1
-            button.grid(row=row, column=2, sticky=E)
+            button.grid(row=row, column=1, sticky=E)
             button.configure(command=lambda b=button: self.button_callback(b))
 
         self.nbins_entry = self.make_entry(val=20.0, fmt='{:5.1f}',
@@ -37,7 +38,8 @@ class PlotPanel(Panel):
         self.col_entry.grid(row=2, column=0, sticky=W)
         self.row_entry = self.make_entry(val=0.0, fmt='{:5.1f}',
                                          tt='Enter row number')
-        self.row_entry.grid(row=2, column=1, sticky=W)
+        self.row_entry.grid(row=3, column=0, sticky=W)
+        self.xprofile = IntVar()
         return
 
     def button_callback(self, button):
@@ -67,19 +69,28 @@ class PlotPanel(Panel):
                 bins = [0.0]
             axes.set_xlim(vmin, vmax)
             axes.hist(image.flatten(), bins)
-        if txt == 'xyprofile':
+        if txt == 'xprofile':
+            ip = self.master.image_panel
+            row_min = ip.ymin_control.get_val()
+            nr, nc = image.shape
+            nrc = nr if nr > nc else nc
+            row = int(float(self.row_entry.get()))
+            xr = np.arange(0, nc)
+            yr = image[row - row_min, :]
+            axes.set_xlim(0, nrc)
+            axes.set_ylim(vmin, vmax)
+            axes.plot(xr, yr, color='red')
+        if txt == 'yprofile':
+            ip = self.master.image_panel
+            col_min = ip.xmin_control.get_val()
             nr, nc = image.shape
             nrc = nr if nr > nc else nc
             column = int(float(self.col_entry.get()))
-            row = int(float(self.row_entry.get()))
             xr = np.arange(0, nr)
-            yc = image[row, :]
-            xc = np.arange(0, nc)
-            yr = image[:, column]
+            yr = image[:, column - col_min]
             axes.set_xlim(0, nrc)
             axes.set_ylim(vmin, vmax)
-            axes.plot(xr, yr, color='green', ls='dashed')
-            axes.plot(xc, yc, color='red')
+            axes.plot(xr, yr, color='green')
         if txt == 'zprofile':
             block = Globals.buffers['A'].block
             nx = block.shape[1]

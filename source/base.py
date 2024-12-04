@@ -40,7 +40,6 @@ class Base(tk.Tk):
         """ Refresh displayed image
         """
         if self.image_panel is not None:
-            # time.sleep(0.2)
             self.image_panel.refresh()
             self.plot_panel.refresh()
         return

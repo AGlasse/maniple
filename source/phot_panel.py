@@ -10,6 +10,7 @@ class PhotPanel(Panel):
 
         self.image_panel = image_panel
         self.config(width=9)
+
         self.config(row=0)              # Display signal value at cursor
         self.x_hover = StringVar()
         self.make_label(textvariable=self.x_hover, column=4, tt='x')
@@ -41,12 +42,21 @@ class PhotPanel(Panel):
         self.make_label(textvariable=phot_command.v_phot, column=6, tt='sum of signal in aperture')
 
         self.config(row=2)
+        self.x_cursor = StringVar()
+        self.make_label(textvariable=self.x_cursor, column=4, tt='x cursor')
+        self.x_cursor.set('{:6d}'.format(0))
+        self.y_cursor = StringVar()
+        self.make_label(textvariable=self.y_cursor, column=5, tt='y cursor')
+        self.y_cursor.set('{:6d}'.format(0))
+
+        self.config(row=3)
         self.centroid_flag = StringVar()
         text = 'Snap to centroid'
         self.do_centroid = IntVar()
         self.make_button(text=text, is_checkbutton=True, intvar=self.do_centroid,
                          tt=text, column=0, columnspan=3)
-        self.config(row=3)
+
+        self.config(row=4)
         text = 'Subtract sky annulus'
         self.do_skysub = IntVar()
         self.make_button(text=text, is_checkbutton=True, intvar=self.do_skysub,
@@ -65,8 +75,12 @@ class PhotPanel(Panel):
         self.image_panel.on_change()
         return
 
+    def set_cursor(self, xc, yc):
+        self.x_cursor.set('{:6d}'.format(int(xc + 0.5)))
+        self.y_cursor.set('{:6d}'.format(int(yc + 0.5)))
+        return
+
     def set_hover(self, x, y, val):
-        # self.lo_text.set('{:6d}'.format(minval))
         self.x_hover.set('{:6.2f}'.format(x))
         self.y_hover.set('{:6.2f}'.format(y))
         self.v_hover.set('{:10.3e}'.format(val))

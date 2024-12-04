@@ -42,7 +42,6 @@ class IoPanel(Panel):
 
     def _display_buffer(self, buff_name):
         Globals.set_display_buffer(buff_name)
-
         self.display_buffer = buff_name
         print('Display buffer ' + buff_name)
         return
@@ -59,15 +58,12 @@ class IoPanel(Panel):
         button.image = icon.image       # Keep image reference
         Tooltip(button, text='Load fits cube into buffer ' + idx,
                 wraplength=200)
-        button.grid(row=row, column=0, sticky=W,
-                    padx=self.pad, pady=self.pad)
+        button.grid(row=row, column=0, sticky=W, padx=self.pad, pady=self.pad)
         name_var = StringVar()
         name_var.set('File ' + idx)
-        file_label = ttk.Label(self, textvariable=name_var, font=font,
-                               width=100)
+        file_label = ttk.Label(self, textvariable=name_var, font=font, width=100)
         self.name_vars.append(name_var)
-        file_label.grid(row=row, column=1, sticky=W,
-                        padx=self.pad, pady=self.pad)
+        file_label.grid(row=row, column=1, sticky=W, padx=self.pad, pady=self.pad)
         self.file_labels.append(file_label)
         return
 
@@ -113,7 +109,6 @@ class FitsDialogue(Toplevel):
             try:
                 os.chdir(load_path)
             except FileNotFoundError:
-                # os.chdir('..')
                 print('Path ' + load_path + ' not found!')
             self.filebox.bind("<Button-1>", self.inspect)
         if func == 'save':                          # Include file name entry
@@ -132,8 +127,9 @@ class FitsDialogue(Toplevel):
         if not self.initial_focus:
             self.initial_focus = self
         self.protocol("WM_DELETE_WINDOW", self.cancel)
-        self.geometry("+%d+%d" % (parent.winfo_rootx() + 50,
-                                  parent.winfo_rooty() + 50))
+        geo_string = "+%d+%d" % (parent.winfo_rootx() - 150, parent.winfo_rooty() + 50)
+        print(geo_string)
+        self.geometry(geo_string)
         self.initial_focus.focus_set()
         self.refresh()
         return
@@ -281,7 +277,7 @@ class FitsDialogue(Toplevel):
                 base = self.parent.get_base()
                 base.reset()
                 base.refresh()
-                self.destroy()
+                # self.destroy()
                 return
         return
 

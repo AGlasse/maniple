@@ -93,11 +93,10 @@ class ImagePanel(Panel):
 
     @staticmethod
     def _toxy(event):
-        is_valid = False
-        x, y, c, r = -1.0, -1.0, -1, -1
+        is_valid, x, y, c, r = False, -1.0, -1.0, -1, -1
         if event.xdata is not None and event.ydata is not None:
             x, y = event.xdata, event.ydata
-            c, r = int(x + 0.5), int(y + 0.5)
+            c, r = int(x + 0.5) - 1, int(y + 0.5) - 1
             is_valid = True
         return is_valid, x, y, c, r
 
@@ -107,7 +106,7 @@ class ImagePanel(Panel):
             val = self.frame[r, c]          # Update position and value labels in phot_panel
             base = self.get_base()
             base.phot_panel.set_hover(x, y, val)
-            if self.active_command is not None:     # Update any active image commands
+            if self.active_command is not None:             # Update any active image commands
                 self.active_command.mouse_motion(x, y)
             self.refresh()
         return
@@ -128,7 +127,9 @@ class ImagePanel(Panel):
                         self.active_command = CropCommand()
                         self.active_command.start(xc, yc)
                     else:                    # Update pixel coordinate widgets.
-                        Globals.cursor_position = xc, yc
+                        base = self.get_base()
+                        base.phot_panel.set_cursor(xc, yc)
+                        # Globals.cursor_position = xc, yc
         if is_done or is_cancelled:
             self.active_command = None
             self.refresh()

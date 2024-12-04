@@ -8,15 +8,21 @@ import tkinter as tk
 
 class Panel(ttk.Frame):
 
+    # Define variables accessible to all panels.
+    x_cursor, y_cursor = None, None             # Cursor position
+
     def __init__(self, parent, **kwargs):
+        Panel.x_cursor = 10
+        Panel.y_cursor = 10
+
         ttk.Frame.__init__(self, parent, borderwidth=10.0)
         self.parent = parent
         screen_width = ttk.Frame.winfo_screenwidth(self)
         idx = int(screen_width / 1000)
-        fontsize = [10, 12, 24][idx]
+        fontsize = [10, 12, 14][idx]
         self.LARGE_FONT = ('Helvetica', fontsize)
-        self.ICON_HEIGHT = [15, 20, 50][idx]
-        self.fig_size = [6, 6.5, 18][idx]
+        self.ICON_HEIGHT = [15, 20, 20][idx]
+        self.fig_size = [6, 6.5, 7][idx]
         pw = [5, 6, 12][idx]
         ph = [3, 4, 8][idx]
         self.PLOT_SIZE = (pw, ph)
